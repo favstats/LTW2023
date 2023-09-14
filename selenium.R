@@ -288,7 +288,7 @@ retrieve_spend_custom <- possibly(retrieve_spend_custom, otherwise = NULL, quiet
 
 # ggl_sel_sp_old <- readRDS("data/ggl_sel_sp.rds")
 
-if(!any(dates$begin30 == ggl_sel_sp_old$from)){
+# if(!any(dates$begin30 == ggl_sel_sp_old$from)){
 # debugonce(retrieve_spend_custom)
   ggl_sel_sp <- unique(ggl_spend$Advertiser_ID) %>%
     # .[10] %>%
@@ -333,168 +333,173 @@ if(!any(dates$begin30 == ggl_sel_sp_old$from)){
             distinct(advertiser_id, .keep_all = T), file = "data/ggl_sel_sp7.rds")
 
 
-}
+# }
 
 unlink("data/ggl", recursive = T, force = T)
 # file.remove("data/ggl/google-political-ads-creative-stats.csv")
 
-
-
-# ggl_sel_sp <- readRDS("data/ggl_sel_sp.rds")
-
-ggl_sel_sp <- ggl_sel_sp %>%
-  filter(num_ads != "0")
-
-# ggl_sel_sp <- readRDS("data/ggl_sel_sp.rds")
-
-c("Bayern", "Hessen") %>% 
-  walk(~{
-    
-    
-    tt_ads <- ggl_sel_sp %>%
-      rename(Advertiser_ID = advertiser_id) %>%
-      left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state))  %>%
-      filter(state == .x) %>% 
-      # mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
-      # filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
-      group_by(party1) %>%
-      summarize(total_num_ads = sum(as.numeric(num_ads))) %>%
-      # count(party1, name = "total_num_ads") %>%
-      mutate(total_num_ads = scales::comma(total_num_ads)) %>%
-      pivot_wider(names_from = party1, values_from = total_num_ads) %>%
-      mutate(party_col = "Number of Ads")
-    
-    
-    ttl_spn <- ggl_sel_sp %>%
-      rename(Advertiser_ID = advertiser_id) %>%
-      left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state)) %>%
-      filter(state == .x) %>% 
-      mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\."))) %>%
-      group_by(party1) %>%
-      summarize(Spend_EUR = sum(Spend_EUR)) %>%
-      arrange(desc(Spend_EUR)) %>%
-      select(party = party1, spend = Spend_EUR) %>%
-      mutate(spend = scales::comma(spend)) %>%
-      mutate(spend = paste0("€", spend)) %>%
-      drop_na() %>%
-      pivot_wider(names_from = party, values_from = spend) %>%
-      mutate(party_col = "Total Spend")
-    
-    
-    
-    tp_spnders <- ggl_sel_sp %>%
-      rename(Advertiser_ID = advertiser_id) %>%
-      left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state, .keep_all = T)  %>%
-                  filter(state == .x) %>%  select(Advertiser_ID, party1, Advertiser_Name)) %>% 
-      mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\.")))   %>%
-      group_by(Advertiser_Name, party1) %>%
-      summarize(Spend_EUR = sum(Spend_EUR)) %>%
-      ungroup() %>%
-      group_by(party1) %>%
-      arrange(desc(Spend_EUR)) %>%
-      slice(1:3) %>%
-      mutate(Spend_EUR = scales::comma(Spend_EUR)) %>%
-      mutate(n_words = str_count(Advertiser_Name, " ")) %>%
-      # mutate(lab = paste0(word(str_remove(page_name, "-"), 1,ifelse(n_words>=2, 3, 2), sep=" "), "<br>(€", total_spend_formatted, ")")) %>%
-      mutate(lab = paste0(Advertiser_Name, " (€", Spend_EUR, ")")) %>%
-      select(party1, lab) %>%
-      drop_na() %>%
-      summarize(lab = paste0("<br>", 1:n(), ". ", lab, collapse = "")) %>%
-      pivot_wider(names_from = party1, values_from = lab) %>%
-      mutate(party_col = "Top Spenders")
-    
-    ggl_all <<- tt_ads %>%
-      bind_rows(tp_spnders) %>%
-      bind_rows(ttl_spn) %>%
-      t() %>%
-      as.data.frame() %>%
-      tibble::rownames_to_column("Coalizione/Partito") %>%
-      set_names(.[nrow(.),] %>% as.character()) %>%
-      slice(1:(n()-1))
-    
-    
-    saveRDS(ggl_all, file = paste0("data/ggl_all_", .x, ".rds"))
-    
-    
-    
-  })
-
-
-
-
-
-
-ggl_sel_sp7 <- ggl_sel_sp7 %>%
-  filter(num_ads != "0")
-
-
-c("Bayern", "Hessen") %>% 
-  walk(~{
-    
-    
-
-tt_ads <- ggl_sel_sp7 %>%
-  rename(Advertiser_ID = advertiser_id) %>%
-  left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state))  %>%
-  filter(state == .x) %>% 
-  # mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
-  # filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
-  group_by(party1) %>%
-  summarize(total_num_ads = sum(as.numeric(num_ads))) %>%
-  # count(party1, name = "total_num_ads") %>%
-  mutate(total_num_ads = scales::comma(total_num_ads)) %>%
-  pivot_wider(names_from = party1, values_from = total_num_ads) %>%
-  mutate(party_col = "Number of Ads")
-
-
-ttl_spn <- ggl_sel_sp7 %>%
-  rename(Advertiser_ID = advertiser_id) %>%
-  left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state)) %>%
-  filter(state == .x) %>% 
-  mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\."))) %>%
-  group_by(party1) %>%
-  summarize(Spend_EUR = sum(Spend_EUR)) %>%
-  arrange(desc(Spend_EUR)) %>%
-  select(party = party1, spend = Spend_EUR) %>%
-  mutate(spend = scales::comma(spend)) %>%
-  mutate(spend = paste0("€", spend)) %>%
-  drop_na() %>%
-  pivot_wider(names_from = party, values_from = spend) %>%
-  mutate(party_col = "Total Spend")
-
-
-
-tp_spnders <- ggl_sel_sp7 %>%
-  rename(Advertiser_ID = advertiser_id) %>%
-  left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state, .keep_all = T) %>%  filter(state == .x) %>% select(Advertiser_ID, party1, Advertiser_Name)) %>%
-  mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\.")))   %>%
-  group_by(Advertiser_Name, party1) %>%
-  summarize(Spend_EUR = sum(Spend_EUR)) %>%
-  ungroup() %>%
-  group_by(party1) %>%
-  arrange(desc(Spend_EUR)) %>%
-  slice(1:3) %>%
-  mutate(Spend_EUR = scales::comma(Spend_EUR)) %>%
-  mutate(n_words = str_count(Advertiser_Name, " ")) %>%
-  # mutate(lab = paste0(word(str_remove(page_name, "-"), 1,ifelse(n_words>=2, 3, 2), sep=" "), "<br>(€", total_spend_formatted, ")")) %>%
-  mutate(lab = paste0(Advertiser_Name, " (€", Spend_EUR, ")")) %>%
-  select(party1, lab) %>%
-  drop_na() %>%
-  summarize(lab = paste0("<br>", 1:n(), ". ", lab, collapse = "")) %>%
-  pivot_wider(names_from = party1, values_from = lab) %>%
-  mutate(party_col = "Top Spenders")
-
-ggl_all7 <<- tt_ads %>%
-  bind_rows(tp_spnders) %>%
-  bind_rows(ttl_spn) %>%
-  t() %>%
-  as.data.frame() %>%
-  tibble::rownames_to_column("Coalizione/Partito") %>%
-  set_names(.[nrow(.),] %>% as.character()) %>%
-  slice(1:(n()-1))
-
-
-saveRDS(ggl_all7, file = paste0("data/ggl_all7_",  .x,".rds"))
-
-
+try({
+  
+  
+  
+  # ggl_sel_sp <- readRDS("data/ggl_sel_sp.rds")
+  
+  ggl_sel_sp <- ggl_sel_sp %>%
+    filter(num_ads != "0")
+  
+  # ggl_sel_sp <- readRDS("data/ggl_sel_sp.rds")
+  
+  c("Bayern", "Hessen") %>% 
+    walk(~{
+      
+      
+      tt_ads <- ggl_sel_sp %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state))  %>%
+        filter(state == .x) %>% 
+        # mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
+        # filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
+        group_by(party1) %>%
+        summarize(total_num_ads = sum(as.numeric(num_ads))) %>%
+        # count(party1, name = "total_num_ads") %>%
+        mutate(total_num_ads = scales::comma(total_num_ads)) %>%
+        pivot_wider(names_from = party1, values_from = total_num_ads) %>%
+        mutate(party_col = "Number of Ads")
+      
+      
+      ttl_spn <- ggl_sel_sp %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state)) %>%
+        filter(state == .x) %>% 
+        mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\."))) %>%
+        group_by(party1) %>%
+        summarize(Spend_EUR = sum(Spend_EUR)) %>%
+        arrange(desc(Spend_EUR)) %>%
+        select(party = party1, spend = Spend_EUR) %>%
+        mutate(spend = scales::comma(spend)) %>%
+        mutate(spend = paste0("€", spend)) %>%
+        drop_na() %>%
+        pivot_wider(names_from = party, values_from = spend) %>%
+        mutate(party_col = "Total Spend")
+      
+      
+      
+      tp_spnders <- ggl_sel_sp %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state, .keep_all = T)  %>%
+                    filter(state == .x) %>%  select(Advertiser_ID, party1, Advertiser_Name)) %>% 
+        mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\.")))   %>%
+        group_by(Advertiser_Name, party1) %>%
+        summarize(Spend_EUR = sum(Spend_EUR)) %>%
+        ungroup() %>%
+        group_by(party1) %>%
+        arrange(desc(Spend_EUR)) %>%
+        slice(1:3) %>%
+        mutate(Spend_EUR = scales::comma(Spend_EUR)) %>%
+        mutate(n_words = str_count(Advertiser_Name, " ")) %>%
+        # mutate(lab = paste0(word(str_remove(page_name, "-"), 1,ifelse(n_words>=2, 3, 2), sep=" "), "<br>(€", total_spend_formatted, ")")) %>%
+        mutate(lab = paste0(Advertiser_Name, " (€", Spend_EUR, ")")) %>%
+        select(party1, lab) %>%
+        drop_na() %>%
+        summarize(lab = paste0("<br>", 1:n(), ". ", lab, collapse = "")) %>%
+        pivot_wider(names_from = party1, values_from = lab) %>%
+        mutate(party_col = "Top Spenders")
+      
+      ggl_all <<- tt_ads %>%
+        bind_rows(tp_spnders) %>%
+        bind_rows(ttl_spn) %>%
+        t() %>%
+        as.data.frame() %>%
+        tibble::rownames_to_column("Coalizione/Partito") %>%
+        set_names(.[nrow(.),] %>% as.character()) %>%
+        slice(1:(n()-1))
+      
+      
+      saveRDS(ggl_all, file = paste0("data/ggl_all_", .x, ".rds"))
+      
+      
+      
+    })
+  
+  
+  
+  
+  
+  
+  ggl_sel_sp7 <- ggl_sel_sp7 %>%
+    filter(num_ads != "0")
+  
+  
+  c("Bayern", "Hessen") %>% 
+    walk(~{
+      
+      
+      
+      tt_ads <- ggl_sel_sp7 %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state))  %>%
+        filter(state == .x) %>% 
+        # mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
+        # filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
+        group_by(party1) %>%
+        summarize(total_num_ads = sum(as.numeric(num_ads))) %>%
+        # count(party1, name = "total_num_ads") %>%
+        mutate(total_num_ads = scales::comma(total_num_ads)) %>%
+        pivot_wider(names_from = party1, values_from = total_num_ads) %>%
+        mutate(party_col = "Number of Ads")
+      
+      
+      ttl_spn <- ggl_sel_sp7 %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state)) %>%
+        filter(state == .x) %>% 
+        mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\."))) %>%
+        group_by(party1) %>%
+        summarize(Spend_EUR = sum(Spend_EUR)) %>%
+        arrange(desc(Spend_EUR)) %>%
+        select(party = party1, spend = Spend_EUR) %>%
+        mutate(spend = scales::comma(spend)) %>%
+        mutate(spend = paste0("€", spend)) %>%
+        drop_na() %>%
+        pivot_wider(names_from = party, values_from = spend) %>%
+        mutate(party_col = "Total Spend")
+      
+      
+      
+      tp_spnders <- ggl_sel_sp7 %>%
+        rename(Advertiser_ID = advertiser_id) %>%
+        left_join(ggl_spend %>% distinct(Advertiser_ID, party1, state, .keep_all = T) %>%  filter(state == .x) %>% select(Advertiser_ID, party1, Advertiser_Name)) %>%
+        mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\.")))   %>%
+        group_by(Advertiser_Name, party1) %>%
+        summarize(Spend_EUR = sum(Spend_EUR)) %>%
+        ungroup() %>%
+        group_by(party1) %>%
+        arrange(desc(Spend_EUR)) %>%
+        slice(1:3) %>%
+        mutate(Spend_EUR = scales::comma(Spend_EUR)) %>%
+        mutate(n_words = str_count(Advertiser_Name, " ")) %>%
+        # mutate(lab = paste0(word(str_remove(page_name, "-"), 1,ifelse(n_words>=2, 3, 2), sep=" "), "<br>(€", total_spend_formatted, ")")) %>%
+        mutate(lab = paste0(Advertiser_Name, " (€", Spend_EUR, ")")) %>%
+        select(party1, lab) %>%
+        drop_na() %>%
+        summarize(lab = paste0("<br>", 1:n(), ". ", lab, collapse = "")) %>%
+        pivot_wider(names_from = party1, values_from = lab) %>%
+        mutate(party_col = "Top Spenders")
+      
+      ggl_all7 <<- tt_ads %>%
+        bind_rows(tp_spnders) %>%
+        bind_rows(ttl_spn) %>%
+        t() %>%
+        as.data.frame() %>%
+        tibble::rownames_to_column("Coalizione/Partito") %>%
+        set_names(.[nrow(.),] %>% as.character()) %>%
+        slice(1:(n()-1))
+      
+      
+      saveRDS(ggl_all7, file = paste0("data/ggl_all7_",  .x,".rds"))
+      
+      
+    })
+  
+  
 })
