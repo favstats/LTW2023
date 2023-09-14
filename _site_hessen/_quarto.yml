@@ -1,0 +1,25 @@
+project:
+  type: website
+  output-dir: ../hessen
+
+website:
+  title: "{{< iconify openmoji flag-poland rotate=180deg >}} 2023 Hessian Election Dashboard"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Spending
+      - targeting.qmd
+      - href: about.qmd
+        text: About
+      - text: "{{< iconify openmoji bavaria-flag >}} Bayern LTW"
+        href: "https://fosstodon.org/@MickaelCanouil"
+    right:
+      - icon: github
+        href: https://github.com/favstats
+      - icon: twitter
+        href: https://twitter.com/favstats
+  sidebar: true  
+format:
+  html:
+    theme: litera
+    
