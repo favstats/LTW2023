@@ -53,7 +53,7 @@ color_dat <- tibble(colors = c("#121212", "#b90e64", "#e00a1e",
 
 
 
-most_left_party <- "LINKE"
+most_left_party <- "SPD"
 
 
 scale_fill_parties <- function(...){
@@ -751,7 +751,7 @@ contested_dat <- interest_targeting %>%
       enabled = TRUE,
       text = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats)."
     )    %>%
-  hc_annotations(list(labels = annotations)) %>%
+  # hc_annotations(list(labels = annotations)) %>%
     hc_colors(hc_dat %>% distinct(party, .keep_all = T) %>%  filter(party %in% contested_dat$party) %>%  arrange(party) %>% pull(colors)) %>%
     hc_exporting(
       enabled = TRUE

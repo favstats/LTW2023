@@ -12,7 +12,7 @@ website:
       - href: about.qmd
         text: About
       - text: "{{< iconify openmoji bavaria-flag >}} Bayern LTW"
-        href: "https://fosstodon.org/@MickaelCanouil"
+        href: "https://favstats.github.io/BayernHessenLTW2023/bayern/"
     right:
       - icon: github
         href: https://github.com/favstats

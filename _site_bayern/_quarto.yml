@@ -12,7 +12,7 @@ website:
       - href: about.qmd
         text: About
       - text: "{{< iconify openmoji flag-poland rotate=180deg >}} Hessen LTW"
-        href: "https://fosstodon.org/@MickaelCanouil"
+        href: "https://favstats.github.io/BayernHessenLTW2023/hessen/"
     right:
       - icon: github
         href: https://github.com/favstats
