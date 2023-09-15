@@ -1,4 +1,4 @@
-scone-pa.clients6.google.com^partitionKey=%28http%2Cgoogle.com%29:HSTS	0	19614	1705617379564,1,1
 aus5.mozilla.org:HSTS	0	19614	1726267005579,1,0
-contile.services.mozilla.com:HSTS	0	19614	1726266976422,1,0
-location.services.mozilla.com:HSTS	0	19614	1726266976225,1,1
+contile.services.mozilla.com:HSTS	1	19615	1726266976422,1,0
+scone-pa.clients6.google.com^partitionKey=%28http%2Cgoogle.com%29:HSTS	1	19615	1705617379564,1,1
+location.services.mozilla.com:HSTS	1	19615	1726266976225,1,1
