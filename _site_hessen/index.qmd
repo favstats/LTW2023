@@ -438,13 +438,13 @@ ggl_spend <- readRDS("../data/ggl_spend.rds") %>% filter(state == "Hessen")
 
 
 ```{r}
-ggl_all <- readRDS("../data/ggl_all_hessen.rds") %>% 
+ggl_all <- readRDS("../data/ggl_all_Hessen.rds") %>% 
 mutate(spendd = readr::parse_number(`Total Spend`)) %>% 
   arrange(desc(spendd)) %>% 
   select(-spendd)
 
 
-ggl_all7 <- readRDS("../data/ggl_all7_hessen.rds") %>% 
+ggl_all7 <- readRDS("../data/ggl_all7_Hessen.rds") %>% 
 mutate(spendd = readr::parse_number(`Total Spend`)) %>% 
   arrange(desc(spendd)) %>% 
   select(-spendd)
