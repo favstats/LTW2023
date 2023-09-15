@@ -1,9 +1,1 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-{"chrome://browser/content/browser.xhtml":{"main-window":{"sizemode":"normal","screenX":"-51","screenY":"71","width":"1292","height":"812"}}}
-=======
 {"chrome://browser/content/browser.xhtml":{"main-window":{"sizemode":"maximized"},"sidebar-box":{"sidebarcommand":"","style":""},"sidebar-title":{"value":""}}}
->>>>>>> 206775917507d02a97c18ffb605bc9c415ec457d
-=======
-{"chrome://browser/content/browser.xhtml":{"main-window":{"sizemode":"maximized"},"sidebar-box":{"sidebarcommand":"","style":""},"sidebar-title":{"value":""}}}
->>>>>>> 206775917507d02a97c18ffb605bc9c415ec457d
