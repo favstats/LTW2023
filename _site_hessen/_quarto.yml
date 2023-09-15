@@ -3,7 +3,7 @@ project:
   output-dir: ../hessen
 
 website:
-  title: "{{< iconify openmoji flag-poland rotate=180deg >}} 2023 Hessian Election Dashboard"
+  title: "2023 Election Dashboard Hessen {{< iconify openmoji flag-poland rotate=180deg >}}"
   navbar:
     left:
       - href: index.qmd
@@ -11,7 +11,7 @@ website:
       - targeting.qmd
       - href: about.qmd
         text: About
-      - text: "{{< iconify openmoji bavaria-flag >}} Bayern LTW"
+      - text: "Bayern LTW {{< iconify openmoji bavaria-flag >}}"
         href: "https://favstats.github.io/BayernHessenLTW2023/bayern/"
     right:
       - icon: github

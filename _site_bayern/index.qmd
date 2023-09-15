@@ -23,9 +23,9 @@ library(gt)
 sets <- jsonlite::fromJSON("settings.json")
 
 
-title_txt <- read_lines("_quarto.yml")
-title_txt[which(str_detect(title_txt, "title"))] <-  glue::glue('  title: "{sets$dashboard}"')
-write_lines(title_txt, "_quarto.yml")
+# title_txt <- read_lines("_quarto.yml")
+# title_txt[which(str_detect(title_txt, "title"))] <-  glue::glue('  title: "{sets$dashboard}"')
+# write_lines(title_txt, "_quarto.yml")
 
 ## Global options
 knitr::opts_chunk$set(
