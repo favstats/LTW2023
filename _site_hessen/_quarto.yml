@@ -12,7 +12,7 @@ website:
       - href: about.qmd
         text: About
       - text: "Bayern LTW {{< iconify openmoji bavaria-flag >}}"
-        href: "https://favstats.github.io/BayernHessenLTW2023/bayern/"
+        href: "https://favstats.github.io/LTW2023/bayern/"
     right:
       - icon: github
         href: https://github.com/favstats
