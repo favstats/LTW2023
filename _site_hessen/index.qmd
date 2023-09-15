@@ -122,11 +122,11 @@ function off() {
 color_dat <- tibble(colors = c("#121212", "#b90e64", "#e00a1e", 
                                "#fecb2f", "#7aba2d", "#1a9fdd", 
                                 "#a5defb", 
-                               "#01acab", "#964B00"),
+                               "#01acab", "#964B00", "#036b2c"),
                     party = c("CDU", "LINKE", "SPD", 
                               "FDP",  "GRÜNE", "AfD", 
                               "dieBasis", 
-                              "FREIE WÄHLER", "HEIMAT"))
+                              "FREIE WÄHLER", "HEIMAT", "KLIMALISTE"))
 
 
 
@@ -414,7 +414,7 @@ eval(parse(text = paste0("gt(the_table7, rowname_col = 'party_col') %>% fmt_mark
 
 ```{r, fig.width=12, fig.height=8, dpi=300}
 ggl_daily <- readRDS("../data/ggl_daily_spending.rds")
-ggl_spend <- readRDS("../data/ggl_spend.rds")
+ggl_spend <- readRDS("../data/ggl_spend.rds") %>% filter(state == "Hessen")
 
 
 
@@ -438,8 +438,16 @@ ggl_spend <- readRDS("../data/ggl_spend.rds")
 
 
 ```{r}
-ggl_all <- readRDS("../data/ggl_all_hessen.rds")
-ggl_all7 <- readRDS("../data/ggl_all7_hessen.rds")
+ggl_all <- readRDS("../data/ggl_all_hessen.rds") %>% 
+mutate(spendd = readr::parse_number(`Total Spend`)) %>% 
+  arrange(desc(spendd)) %>% 
+  select(-spendd)
+
+
+ggl_all7 <- readRDS("../data/ggl_all7_hessen.rds") %>% 
+mutate(spendd = readr::parse_number(`Total Spend`)) %>% 
+  arrange(desc(spendd)) %>% 
+  select(-spendd)
 
 sum30_ggl <- ggl_all %>% 
     mutate(total_spend_formatted = parse_number(`Total Spend`)) %>% 
@@ -510,8 +518,8 @@ eval(parse(text = paste0("gt(ggl_all7, rowname_col = 'party_col') %>% fmt_markdo
 
 
 ```{r, fig.width=12, fig.height=8, dpi=300}
-ggl_daily <- readRDS("../data/ggl_daily_spending.rds")
-ggl_spend <- readRDS("../data/ggl_spend.rds")
+# ggl_daily <- readRDS("../data/ggl_daily_spending.rds")
+# ggl_spend <- readRDS("../data/ggl_spend.rds")
 
 
 
@@ -638,6 +646,8 @@ eval(parse(text = paste0("gt(all_spending7, rowname_col = 'party_col') %>% fmt_m
 
 # Spending over Time
 
+Daily spending estimates might not be entirely accurate as reporting granularity differs (e.g. on Google minimum amounts of 50 Euro are displayed). For total estimates refer to the spending in the section above.
+
 ::: {.panel-tabset}
 
 
@@ -651,7 +661,7 @@ eval(parse(text = paste0("gt(all_spending7, rowname_col = 'party_col') %>% fmt_m
 ### Cumulative
 
 ```{r, out.width="100%"}
-more_data <- readr::read_rds("../lifelong/NL.rds")  %>%
+more_data <- readr::read_rds("../lifelong/DE.rds")  %>%
     mutate(date_produced = lubridate::ymd(date)) %>%
   drop_na(date_produced) %>% 
     janitor::clean_names()%>% #rename(advertiser_id = page_id) %>%
@@ -720,6 +730,11 @@ hc_data_cumfb <- hc_data_cum_raw %>%
   mutate(`Daily Spend` = spend - first(spend)) %>%
   ungroup() 
 
+color_order <- hc_data_cumfb %>%
+  distinct(party, .keep_all = T) %>%
+  arrange(party) %>%
+  pull(colors)
+
 hc_data_cumfb %>% 
   # mutate(spend)
   hchart("area", hcaes(x = Date, y = `Daily Spend`, group = party, fill = colors)) %>%
@@ -757,6 +772,11 @@ hc_data_dafb <- hc_data_cum_raw %>%
   mutate(`Daily Spend` = spend - lag(spend, default = first(spend))) %>%
   ungroup() 
 
+color_order <- hc_data_dafb %>%
+  distinct(party, .keep_all = T) %>%
+  arrange(party) %>%
+  pull(colors)
+
 hc_data_dafb %>% 
   # mutate(spend)
   hchart("area", hcaes(x = Date, y = `Daily Spend`, group = party, fill = colors)) %>%
@@ -772,15 +792,15 @@ hc_data_dafb %>%
     positioner = JS("function (labelWidth, labelHeight, point) {
         return { x: 200, y: this.chart.plotTop };
     }")
-  )  %>%
-   hc_chart(events = list(load = JS("function() {
-   var chart = this;
-   chart.series[0].setVisible(false)
-   chart.series[1].setVisible(false)
-   chart.series[2].setVisible(false)
-   chart.series[3].setVisible(false)
-   chart.series[4].setVisible(false)
-   }"))) 
+  )  #%>%
+   # hc_chart(events = list(load = JS("function() {
+   # var chart = this;
+   # chart.series[0].setVisible(false)
+   # chart.series[1].setVisible(false)
+   # chart.series[2].setVisible(false)
+   # chart.series[3].setVisible(false)
+   # chart.series[4].setVisible(false)
+   # }"))) 
 # hc_colors(levels(hc_data$party))
 # hc_colors(color_dat$colors[as.character(unique(hc_data$party))])
 
@@ -812,6 +832,7 @@ hc_data_cumggl <-  ggl_daily %>%
     left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>% 
     janitor::clean_names()  %>% 
     rename(party = party1) %>% 
+    drop_na(party) %>%
     mutate(date_produced = lubridate::ymd(date)) %>%
     mutate(spend = readr::parse_number(str_remove(eur_amount, "\\."))) %>%  
     group_by(date_produced, party) %>% 
@@ -877,6 +898,7 @@ hc_data_daggl <-  ggl_daily %>%
     left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>% 
     janitor::clean_names()  %>% 
     rename(party = party1) %>% 
+    drop_na(party) %>%
     mutate(date_produced = lubridate::ymd(date)) %>%
     mutate(spend = readr::parse_number(str_remove(eur_amount, "\\."))) %>%  
     group_by(date_produced, party) %>% 

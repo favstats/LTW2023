@@ -65,9 +65,12 @@ ggl_spend <- gglstats   %>%
   group_by(Advertiser_ID, Advertiser_Name) %>%
   summarize(Spend_Range_Min_EUR = sum(Spend_Range_Min_EUR)) %>%
   ungroup() %>%
-  left_join(readRDS("data/ggladvers.rds")) %>%
+  left_join(readRDS("data/ggladvers.rds"))  %>% 
   drop_na(party) %>%
+  bind_rows(readRDS("data/ggladvers.rds")) %>% 
+  distinct(Advertiser_ID, .keep_all = T) %>% 
   rename(party1 = party)
+
 
 # openxlsx::read.xlsx("data/ggl.xlsx") %>%
 #   filter(party != "xxx") %>%
@@ -103,9 +106,6 @@ print("headlesss")
 page_df <- browser_df %>%
   glimpse
 
-# remDr <- rD$client
-# urlss
-page_df <- browser_df
 
 retrieve_spend_daily <- function(id, the_date, cntry = "DE") {
   
@@ -183,9 +183,9 @@ if(exists("daily_spending_old")){
     # slice(1) %>%
     split(1:nrow(.)) %>%
     map_dfr_progress(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
-  
+
   saveRDS(daily_spending %>% bind_rows(daily_spending_old) %>% distinct(), file = "data/ggl_daily_spending.rds")
-  
+
 } else {
   daily_spending <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>%
     set_names(c("advertiser_id", "timelines")) %>%
@@ -193,9 +193,9 @@ if(exists("daily_spending_old")){
     # slice(1) %>%
     split(1:nrow(.)) %>%
     map_dfr_progress(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
-  
+
   saveRDS(daily_spending, file = "data/ggl_daily_spending.rds")
-  
+
 }
 
 
