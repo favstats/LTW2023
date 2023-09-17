@@ -1,5 +1,0 @@
-scone-pa.clients6.google.com^partitionKey=%28http%2Cgoogle.com%29:HSTS	0	19617	1705810626973,1,1
-aus5.mozilla.org:HSTS	0	19617	1726460252398,1,0
-contile.services.mozilla.com:HSTS	0	19617	1726456563624,1,0
-www.facebook.com^partitionKey=%28http%2Cfacebook.com%29:HSTS	0	19617	1710472564507,1,0
-location.services.mozilla.com:HSTS	0	19617	1726456563389,1,1
