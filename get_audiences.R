@@ -14,9 +14,10 @@ library(lubridate)
 
 
 
-# tf <- Sys.getenv("TIMEFRAME")c
-# tf <- "7"
-# print(tf)
+if(Sys.info()[["sysname"]]=="Windows"){
+  ### CHANGE ME WHEN LOCAL!
+  tf <- "30"
+}
 
 jb <- get_targeting("7860876103", timeframe = glue::glue("LAST_90_DAYS"))
 
