@@ -159,7 +159,8 @@ election_dat30 <- readRDS("../data/election_dat30.rds") %>%
   filter(is.na(no_data)) %>% 
   filter(party != "And") %>% 
   filter(state == "Bayern") %>% 
-  filter(str_detect(page_name, "Bundestag", negate = T))
+  filter(str_detect(internal_id, "Bundestag", negate = T)) %>% 
+  mutate(party = ifelse(internal_id == "166316026769607", "FDP", party))
 
 
 election_dat7 <- readRDS("../data/election_dat7.rds") %>% 
@@ -168,7 +169,8 @@ election_dat7 <- readRDS("../data/election_dat7.rds") %>%
   filter(is.na(no_data)) %>% 
   filter(party != "And") %>% 
   filter(state == "Bayern") %>% 
-  filter(str_detect(page_name, "Bundestag", negate = T))
+  filter(str_detect(page_name, "Bundestag", negate = T))%>% 
+  mutate(party = ifelse(internal_id == "166316026769607", "FDP", party))
 
 
 fin <- (as.Date(election_dat30$ds[1])-lubridate::days(1))
@@ -200,6 +202,9 @@ if(the_currency == "EUR"){
 }
 
   # election_dat7 %>% count(party)
+
+# election_dat30 %>% 
+#   filter(str_detect(value, "migration"))
 ```
 
 

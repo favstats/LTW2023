@@ -97,7 +97,8 @@ bv <- readRDS("data/bv.rds")
 # hv %>% count(party, sort = T)
 
 wtm_data <- hv %>% 
-  bind_rows(bv)
+  bind_rows(bv) %>% 
+  mutate(party = ifelse(page_id == "166316026769607", "FDP", party))
 # 
 # wtm_data %>%
 #   count(party, sort = T)
