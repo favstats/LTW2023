@@ -3,6 +3,8 @@ title: "Targeting"
 format:
   html:
     theme: lumen
+    toc: true
+    toc-location: left
 ---
 
 ```{r setup, include=FALSE}
@@ -119,6 +121,7 @@ if(the_currency == "EUR"){
 ```
 
 This section shows spending per *targeting criteria* used by political parties to reach citizens in the run-up to the `r sets$election_title` for the latest available data. It only includes targeting on Meta platforms (Facebook and Instagram), which offers the most detailed targeting options to political advertisers.
+
 
 
 
@@ -440,13 +443,13 @@ tags$div(class = "container", do.call(tags$div, rows))
 
 ::: 
 
+# Detailed Audiences
 
 ## Top Targeted (Detailed) Audiences 
 
 Here, we show the *top targeted audiences* for each party for the "detailed" targeting that Meta offers (ranked by amount of Euro spend). Most (but not all) of these audiences are “interest” audiences, i.e. the parties targeted people interested in “Books” or “Politics”.
 
 ::: {.panel-tabset}
-
 
 
 
@@ -538,8 +541,6 @@ contested_dat7 <- interest_targeting7 %>%
 ```
 
 
-
-
 ### `r last30days_string` (Last 30 days)
 
 
@@ -547,7 +548,16 @@ contested_dat7 <- interest_targeting7 %>%
 
 ```{r, fig.width=16, fig.height=12, dpi=300}
 
-generate_plots <- function(data) {
+generate_plots <- function(data, exclusion = F) {
+  
+  if(exclusion){
+    wooord <- "on ads excluding"
+    wooord2 <- "excluding"
+  } else {
+    wooord <- "on ads including"
+    wooord2 <- "targeting"
+  }
+  
   gg <- data %>%
     group_by(party) %>%
     arrange(desc(perc)) %>%
@@ -566,7 +576,7 @@ generate_plots <- function(data) {
              color = the_color) %>%
         hc_plotOptions(bar = list(horizontal = TRUE, stacking = "normal")) %>%
         hc_yAxis(
-          title = list(text = "% Party Budget spent on targeting method"),
+          title = list(text = paste0("% Party Budget spent on ", wooord2, " audience")),
           max = max(.x$perc)#,
           # min = 0
         ) %>%
@@ -576,7 +586,7 @@ generate_plots <- function(data) {
           pointFormat = paste0(
             "<b>{point.value}</b><br>% of Total Budget Spent: {point.y:.1f}%<br>Spend a total of ",
             currency_symbol,
-            "{point.spend_perlab} on this method."
+            "{point.spend_perlab} ", wooord, " this audience."
           ),
           headerFormat = ""
         ) %>%
@@ -665,27 +675,17 @@ tags$div(class = "container", do.call(tags$div, rows))
 
 :::
 
+## Top Excluded (Detailed) Audiences 
 
-
-
-
-
-
-## Top Contested Audiences 
-
-Here, we show the *top most contested audiences*, i.e. where all parties have spent considerable amounts of money competing to reach voters with the same interests. 
-
+Here, we show the *top excluded audiences* for each party for the "detailed" targeting that Meta offers (ranked by amount of Euro spend). Most (but not all) of these audiences are “interest” audiences, i.e. the parties excluded people interested in “Books” or “Politics”.
 
 ::: {.panel-tabset}
 
 
-```{r, fig.width  = 13, fig.height=15}
 
+```{r}
 
-get_contested_graph <- function(ppp, minamount = 50, n_parties = 3) {
-    
-    # ppp <- election_dat30
-interest_targeting <-  ppp %>% 
+interest_excluding30 <-  election_dat30 %>% 
     mutate(total_spend = total_spend_formatted) %>% 
     filter(type == "detailed") %>%
     # mutate(total_spend = readr::parse_number(total_spend_formatted)) %>%
@@ -701,7 +701,178 @@ interest_targeting <-  ppp %>%
     ungroup() %>%
     arrange(desc(total_spend)) 
 
-contested_dat <- interest_targeting %>% 
+# election_dat30 %>% 
+#     filter(!is_exclusion) %>% 
+#     group_by(party)
+#     ggplot(aes())
+    
+excluded_dat30 <- interest_excluding30 %>% 
+  filter(is_exclusion) %>% 
+  # filter(total_spend >= 40000) %>% 
+  filter(total_spend >= 1) %>%
+  # add_count(value) %>% 
+  # filter(n >= 5) %>% 
+  left_join(byparty30) %>% 
+  group_by(party) %>% 
+  # mutate(total_spenderino = sum(total_spend)) %>% 
+  mutate(perc = total_spend/total_spenderino) %>%
+  mutate(value = str_remove_all(value, "INTERESTS: |DEMOGRAPHICS: |BEHAVIORS: ")) #%>%
+  # mutate(value = str_replace_all(value, " \\s*\\([^\\)]+\\)", ""))
+
+
+
+interest_excluding7 <-  election_dat7 %>% 
+    mutate(total_spend = total_spend_formatted) %>% 
+    filter(type == "detailed") %>%
+    # mutate(total_spend = readr::parse_number(total_spend_formatted)) %>%
+    mutate(total_spend = ifelse(total_spend == 50, 50, total_spend)) %>%
+    mutate(total_spend = total_spend * total_spend_pct) %>%
+    filter(main_currency == the_currency)  %>%
+    # left_join(page_names %>% select(internal_id = page_id, page_name) %>% distinct(internal_id, .keep_all =T)) %>%
+    # left_join(us_advertisers %>% rename(internal_id = page_id)) %>%
+    # drop_na(left_vs_right) %>%
+    mutate(value = paste0(detailed_type,": ", value)) %>% 
+    group_by(party, value, is_exclusion, detailed_type) %>%
+    summarise(total_spend = sum(total_spend)) %>%
+    ungroup() %>%
+    arrange(desc(total_spend)) 
+
+# election_dat30 %>% 
+#     filter(!is_exclusion) %>% 
+#     group_by(party)
+#     ggplot(aes())
+    
+excluded_dat7 <- interest_excluding7 %>% 
+  filter(is_exclusion) %>% 
+  # filter(total_spend >= 40000) %>% 
+  filter(total_spend >= 1) %>%
+  # add_count(value) %>% 
+  left_join(byparty7) %>% 
+  group_by(party) %>% 
+  # mutate(total_spenderino = sum(total_spend)) %>% 
+  mutate(perc = total_spend/total_spenderino) %>%
+  mutate(value = str_remove_all(value, "INTERESTS: |DEMOGRAPHICS: |BEHAVIORS: ")) #%>%
+  # mutate(value = str_replace_all(value, " \\s*\\([^\\)]+\\)", ""))
+
+```
+
+
+### `r last30days_string` (Last 30 days)
+
+
+```{r echo=FALSE, results='asis'}
+
+# Generate plots
+plots <- generate_plots(excluded_dat30, exclusion = T)
+
+if(length(plots)!=0){
+  
+  # Map each plot to a column
+columns <- map(plots, ~ div(style = "width: 50%; float: left;", .x))
+
+# If there's an odd number of plots, add an empty div to the end to balance the columns
+if (length(columns) %% 2 == 1) {
+  columns <- c(columns, list(div(style = "width: 50%; float: left;")))
+}
+
+# Pair up the columns and wrap them in rows
+rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
+  div(class = "row",
+    list(
+      columns[[.x]],
+      columns[[.x + 1]]
+    )
+  )
+})
+
+# Print the rows
+tags$div(class = "container", do.call(tags$div, rows))
+
+
+  
+}  else {
+  shiny::HTML("No data (yet).")
+}
+
+```
+
+
+
+### `r last7days_string` (Last 7 days)
+
+
+```{r echo=FALSE, results='asis'}
+
+# Generate plots
+plots <- generate_plots(excluded_dat7, exclusion = T)
+
+if(length(plots)!=0){
+  
+  # Map each plot to a column
+columns <- map(plots, ~ div(style = "width: 50%; float: left;", .x))
+
+# If there's an odd number of plots, add an empty div to the end to balance the columns
+if (length(columns) %% 2 == 1) {
+  columns <- c(columns, list(div(style = "width: 50%; float: left;")))
+}
+
+# Pair up the columns and wrap them in rows
+rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
+  div(class = "row",
+    list(
+      columns[[.x]],
+      columns[[.x + 1]]
+    )
+  )
+})
+
+# Print the rows
+tags$div(class = "container", do.call(tags$div, rows))
+
+
+  
+}  else {
+  shiny::HTML("No data (yet).")
+}
+
+
+
+```
+
+:::
+
+## Top Contested Audiences 
+
+Here, we show the *top most contested audiences*, i.e. where all parties have spent considerable amounts of money competing to reach voters with the same interests. 
+
+
+::: {.panel-tabset}
+
+
+```{r, fig.width  = 13, fig.height=15}
+
+
+get_contested_graph <- function(ppp, minamount = 1000, n_parties = 3) {
+    
+    # ppp <- election_dat30
+interest_targeting <-  ppp %>% 
+    mutate(total_spend = total_spend_formatted) %>% 
+    filter(type == "detailed") %>%
+    # mutate(total_spend = readr::parse_number(total_spend_formatted)) %>%
+    mutate(total_spend = ifelse(total_spend == 50, 50, total_spend)) %>%
+    mutate(total_spend = total_spend * total_spend_pct) %>%
+    filter(main_currency == the_currency)  %>%
+    # left_join(page_names %>% select(internal_id = page_id, page_name) %>% distinct(internal_id, .keep_all =T)) %>%
+    # left_join(us_advertisers %>% rename(internal_id = page_id)) %>%
+    # drop_na(left_vs_right) %>%
+    mutate(value = paste0(detailed_type,": ", value)) %>% 
+    group_by(party, value, is_exclusion, detailed_type) %>% 
+  # mutate(value = str_replace_all(value, " \\s*\\([^\\)]+\\)", "")) %>% 
+    summarise(total_spend = sum(total_spend)) %>%
+    ungroup() %>%
+    arrange(desc(total_spend)) 
+
+contested_dat <<- interest_targeting %>% 
   filter(!is_exclusion) %>% 
   # filter(total_spend >= 40000) %>% 
   filter(total_spend >= minamount) %>%
@@ -711,9 +882,16 @@ contested_dat <- interest_targeting %>%
   group_by(value) %>% 
   mutate(total_spenderino = sum(total_spend)) %>% 
   mutate(perc = total_spend/total_spenderino) %>%
-  # mutate(value = str_remove_all(value, "INTERESTS: |DEMOGRAPHICS: |BEHAVIORS: ")) %>% 
-  mutate(value = str_replace_all(value, " \\s*\\([^\\)]+\\)", "")) %>% 
-    ungroup()
+  # mutate(value = str_remove_all(value, "INTERESTS: |DEMOGRAPHICS: |BEHAVIORS: "))  %>% 
+  ungroup() 
+
+justkeeptop20 <- contested_dat %>%
+  arrange(desc(total_spenderino)) %>% 
+  distinct(value, total_spenderino) %>% 
+  slice(1:20)
+
+contested_dat <- contested_dat %>% 
+  filter(value %in% justkeeptop20$value)
 
 
   the_order <- contested_dat %>%
@@ -756,7 +934,7 @@ contested_dat <- interest_targeting %>%
     hc_plotOptions(bar = list(stacking = "normal")) %>%
     hc_xAxis(title = list(text = "Targeting criteria"), labels = list(style = list(fontSize = "10px")),
                  categories = as.list(the_order)) %>%
-    hc_yAxis(title = list(text = "% of budget spent on targeting method"), labels = list(format = "{value}%"))%>%
+    hc_yAxis(title = list(text = "% of budget spent on targeting method"), labels = list(format = "{value}%"), max = 100, min = 0) %>%
             # hc_add_theme(hc_theme_google()) %>%
   highcharter::hc_tooltip(
     pointFormat = paste0("<b>{point.party}</b><br>..makes up {point.y:.1f}% of total budget spent on {point.value}. <br>..spend a total of ", currency_symbol, "{point.total_spend:.0f} on this audience.<br><br>Total Expenditure on audience is ", currency_symbol, "{point.total_spenderino:.0f}."),
@@ -768,15 +946,24 @@ contested_dat <- interest_targeting %>%
       text = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats)."
     )    %>%
   # hc_annotations(list(labels = annotations)) %>%
-    hc_colors(hc_dat %>% distinct(party, .keep_all = T) %>%  filter(party %in% contested_dat$party) %>%  arrange(party) %>% pull(colors)) %>%
-    hc_exporting(
-      enabled = TRUE
-    )
+    hc_colors(hc_dat %>% distinct(party, .keep_all = T) %>%  filter(party %in% contested_dat$party) %>%  arrange(party) %>% pull(colors)) #%>%
+    # hc_exporting(
+    #   enabled = TRUE
+    # )
 }
 
 
+      # hc_yAxis(title = list(text = "% Party Budget spent on targeting method"), max = 100, min = 0) %>%
 
-  
+# election_dat30 %>% 
+#   # count(detailed_type)
+# filter(detailed_type == "DEMOGRAPHICS") %>% 
+#   count(value, sort = T)
+# 
+# contested_dat %>% 
+#   # count(detailed_type)
+# filter(value == "DEMOGRAPHICS: Parents") 
+
 
 
 ```
@@ -785,7 +972,7 @@ contested_dat <- interest_targeting %>%
 ### `r last30days_string` (Last 30 days)
 
 ```{r}
-thegraph30 <- get_contested_graph(election_dat30, minamount = 200)
+thegraph30 <- get_contested_graph(election_dat30, minamount = 100)
 
 if(length(thegraph30$x$hc_opts$series)!=0){
   thegraph30
@@ -799,7 +986,7 @@ if(length(thegraph30$x$hc_opts$series)!=0){
 
 ```{r, fig.width  = 10, fig.height=15}
 
-thegraph7 <- get_contested_graph(election_dat7, minamount = 200)
+thegraph7 <- get_contested_graph(election_dat7, minamount = 100)
 
 
 if(length(thegraph7$x$hc_opts$series)!=0){
@@ -811,6 +998,8 @@ if(length(thegraph7$x$hc_opts$series)!=0){
 ```
 
 :::
+
+# Location
 
 ## Geographical Targeting 
 
@@ -844,7 +1033,7 @@ region_dat <- election_dat30 %>%
             num_ads = sum(num_ads)) %>%
   ungroup() %>%
   rename(region = value) %>%
-  mutate(region = str_remove_all(region, ", Germany")) 
+  mutate(region = str_remove_all(region, ", Poland")) 
 
 the_colors <- region_dat %>% 
   group_by(party) %>% 
@@ -943,7 +1132,7 @@ region_dat <- election_dat30 %>%
             num_ads = sum(num_ads)) %>%
   ungroup() %>%
   rename(region = value) %>%
-  mutate(region = str_remove_all(region, ", Germany")) 
+  mutate(region = str_remove_all(region, ", Poland")) 
 
 the_colors <- region_dat %>% 
   group_by(party) %>% 
@@ -1018,7 +1207,7 @@ region_dat <- election_dat30 %>%
             num_ads = sum(num_ads)) %>%
   ungroup() %>%
   rename(region = value) %>%
-  mutate(region = str_remove_all(region, ", Germany")) 
+  mutate(region = str_remove_all(region, ", Netherlands")) 
 
 the_colors <- region_dat %>% 
   group_by(party) %>% 
@@ -1078,7 +1267,7 @@ region_dat <- election_dat30 %>%
             num_ads = sum(num_ads)) %>%
   ungroup() %>%
   rename(region = value) %>%
-  mutate(region = str_remove_all(region, ", Germany")) 
+  mutate(region = str_remove_all(region, ", Netherlands")) 
 
 the_colors <- region_dat %>% 
   group_by(party) %>% 
@@ -1120,6 +1309,8 @@ if(nrow(region_dat)!=0) {
 :::
 
 :::
+
+# Demographics
 
 ## Age Targeting
 
@@ -1433,7 +1624,9 @@ charts <- gender_targeting %>%
 # Map each plot to a column
 columns <- map(charts, ~ div(style = "width: 50%; float: left;", .x))
 
-# If there's an odd number of plots, add an empty div to the end to balance the columns
+if(length(columns)!=0){
+  
+  # If there's an odd number of plots, add an empty div to the end to balance the columns
 if (length(columns) %% 2 == 1) {
   columns <- c(columns, list(div(style = "width: 50%; float: left;")))
 }
@@ -1448,8 +1641,16 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
   )
 })
 
+
+
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
+  
+} else {
+  shiny::HTML("No data (yet).")
+}
+
+
 
 
 ```
@@ -1509,7 +1710,9 @@ charts <- gender_targeting %>%
 # Map each plot to a column
 columns <- map(charts, ~ div(style = "width: 50%; float: left;", .x))
 
-# If there's an odd number of plots, add an empty div to the end to balance the columns
+if(length(columns)!=0){
+  
+  # If there's an odd number of plots, add an empty div to the end to balance the columns
 if (length(columns) %% 2 == 1) {
   columns <- c(columns, list(div(style = "width: 50%; float: left;")))
 }
@@ -1524,8 +1727,16 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
   )
 })
 
+
+
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
+  
+} else {
+  shiny::HTML("No data (yet).")
+}
+
+
 
 
 ```
@@ -1591,6 +1802,8 @@ educ_targeting <- election_dat30 %>%
      # mutate(coalition = fct_relevel(coalition, c("Coalizione di centro-sinistra",
                                   # "Terzo Polo",
                                   # "Coalizione di centro-destra"))) %>% 
+    group_by(party) %>%
+    arrange(desc(perc)) %>%
     mutate(value = fct_reorder(value, perc))
 
 
@@ -1631,11 +1844,12 @@ charts <- educ_targeting %>%
 
     
 
-
 # Map each plot to a column
 columns <- map(charts, ~ div(style = "width: 50%; float: left;", .x))
 
-# If there's an odd number of plots, add an empty div to the end to balance the columns
+if(length(columns)!=0){
+  
+  # If there's an odd number of plots, add an empty div to the end to balance the columns
 if (length(columns) %% 2 == 1) {
   columns <- c(columns, list(div(style = "width: 50%; float: left;")))
 }
@@ -1650,8 +1864,16 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
   )
 })
 
+
+
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
+  
+} else {
+  shiny::HTML("No data (yet).")
+}
+
+
 
 
 ```
@@ -1665,8 +1887,11 @@ educ_targeting <- election_dat7 %>%
     map_dfr(calc_edu_perc) %>% 
      # mutate(coalition = fct_relevel(coalition, c("Coalizione di centro-sinistra",
                                   # "Terzo Polo",
-                                  # "Coalizione di centro-destra"))) %>% 
+                                  # "Coalizione di centro-destra")))  %>% 
+    group_by(party) %>%
+    arrange(desc(perc)) %>%
     mutate(value = fct_reorder(value, perc))
+
 
 
 
@@ -1710,7 +1935,9 @@ charts <- educ_targeting %>%
 # Map each plot to a column
 columns <- map(charts, ~ div(style = "width: 50%; float: left;", .x))
 
-# If there's an odd number of plots, add an empty div to the end to balance the columns
+if(length(columns)!=0){
+  
+  # If there's an odd number of plots, add an empty div to the end to balance the columns
 if (length(columns) %% 2 == 1) {
   columns <- c(columns, list(div(style = "width: 50%; float: left;")))
 }
@@ -1725,8 +1952,16 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
   )
 })
 
+
+
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
+  
+} else {
+  shiny::HTML("No data (yet).")
+}
+
+
 
 
 ```
@@ -1874,7 +2109,13 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
     
+}  else {
+  shiny::HTML("No data (yet).")
 }
+
+
+
+
 
 
 
@@ -1974,7 +2215,11 @@ rows <- map(seq(from = 1, to = length(columns), by = 2), ~ {
 # Print the rows
 tags$div(class = "container", do.call(tags$div, rows))
     
+}  else {
+  shiny::HTML("No data (yet).")
 }
+
+
 
 
 ```

@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Landtagswahlen 2023
 
-+ [Bayern Landtagswahl 2023](favstats.github.io/LTW2023/bayern)
++ [Bayern Landtagswahl 2023](/LTW2023/bayern)
 
-+ [Hessen Landtagswahl 2023](favstats.github.io/LTW2023/bayern)
++ [Hessen Landtagswahl 2023](/LTW2023/bayern)
 
