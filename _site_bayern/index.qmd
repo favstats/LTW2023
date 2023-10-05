@@ -206,10 +206,10 @@ if(the_currency == "EUR"){
 # election_dat30 %>% 
 #   filter(str_detect(value, "migration"))
 
-election_dat30 %>% 
-  filter(party == "CSU") %>% 
-  filter(value == "Politics") %>% 
-  select(total_spend_pct, page_name, total_spend_formatted)
+# election_dat30 %>% 
+#   filter(party == "CSU") %>% 
+#   filter(value == "Politics") %>% 
+#   select(total_spend_pct, page_name, total_spend_formatted)
 ```
 
 
