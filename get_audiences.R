@@ -5,7 +5,7 @@ tf <- commandArgs(trailingOnly = TRUE)
 
 source("utils.R")
 # ?get_targeting
-# get_targeting("41459763029", timeframe = "LAST_90_DAYS")
+# get_targeting("366343133439370", timeframe = "LAST_90_DAYS")
 # debugonce(get_targeting)
 
 library(httr)
@@ -94,11 +94,80 @@ write_lines(lubridate::as_date(tstamp), "tstamp.txt")
 hv <- readRDS("data/hv.rds") %>% mutate(party = ifelse(party == "CSU", "CDU", party))
 bv <- readRDS("data/bv.rds")
 
+
+
+# List of page IDs
+# bv_ids <- c("1352246401", "1983928540", "345598788891061", 
+#               "305250279569563", "81386795687", "395274800547275", 
+#               "134457900027950", "276040002549416", "258191139993", 
+#               "158888744130107", "118598124966673", "1063894523641714",
+#               "1731781957148285", "366343133439370", "320748971641029",
+#               "112072139503036")
+# 
+# hv_ids <- c("222005461272345", 
+#             "1471892976391043", 
+#             "22865297210", 
+#             "217523541326", 
+#             "558754197477014", 
+#             "121186698360818", 
+#             "477942969211245", 
+#             "188188564583", 
+#             "256998207759081",
+#             "1383768438607322", 
+#             "49037455311",
+#             "331622844197016",
+#             "111080175616050", 
+#             "354492595049805", 
+#             "2503518396540820")
+
+# # Page IDs present in the bv dataset
+# present_ids <- bv %>% 
+#   filter(page_id %in% bv_ids) %>% 
+#   pull(page_id)
+# 
+# # Page IDs not present in the bv dataset
+# missing_ids <- setdiff(bv_ids, present_ids)
+# 
+# print(missing_ids)
+
+# Page IDs present in the bv dataset
+# present_ids <- hv %>% 
+#   filter(page_id %in% hv_ids) %>% 
+#   pull(page_id)
+# 
+# # Page IDs not present in the bv dataset
+# missing_ids <- setdiff(hv_ids, present_ids)
+# 
+# print(missing_ids)
+
+
+
+
 # hv %>% count(party, sort = T)
 
 wtm_data <- hv %>% 
   bind_rows(bv) %>% 
-  mutate(party = ifelse(page_id == "166316026769607", "FDP", party))
+  mutate(party = ifelse(page_id == "166316026769607", "FDP", party)) %>% 
+  bind_rows(
+    tibble(
+      page_id = c("134457900027950", "158888744130107", "1063894523641714", 
+                  "366343133439370", "1471892976391043", "121186698360818",
+                  "477942969211245", "1383768438607322", "49037455311",
+                  "331622844197016", "2503518396540820"),
+      page_name = c("Florian von Brunn", "Hubert Aiwanger Minister Bundesvors. Freie Wähler", "Katrin Ebner-Steiner", 
+                    "Markus Söder", "Boris Rhein", "Elisabeth Kula",
+                    "Engin Eroglu", "Jan Schalauske", "Nancy Faeser",
+                    "Robert Lambrou", "Tarek Al-Wazir"),
+      party = c("SPD", "FREIE WÄHLER", "AfD",
+                "CSU", "CDU", "LINKE", 
+                "FREIE WÄHLER", "LINKE", "SPD",
+                "AfD", "GRÜNE"),
+      state = c("Bayern", "Bayern", "Bayern", 
+                "Bayern", "Hessen", "Hessen",
+                "Hessen", "Hessen", "hessen",
+                "Hessen", "Hessen")
+    )
+  )
 # 
 # wtm_data %>%
 #   count(party, sort = T)
