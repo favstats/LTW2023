@@ -83,7 +83,8 @@ election_dat30 <- readRDS("../data/election_dat30.rds") %>%
     rename(internal_id = page_id) %>% 
   filter(party != "And")  %>% 
   filter(is.na(no_data)) %>% 
-  filter(state == "Hessen")
+  filter(state == "Hessen") %>% 
+  filter(str_detect(page_name, "Bundestag", negate =T))
 
 
 election_dat7 <- readRDS("../data/election_dat7.rds") %>%
@@ -91,7 +92,8 @@ election_dat7 <- readRDS("../data/election_dat7.rds") %>%
     rename(internal_id = page_id) %>% 
   filter(party != "And")  %>% 
   filter(is.na(no_data)) %>% 
-  filter(state == "Hessen")
+  filter(state == "Hessen")%>% 
+  filter(str_detect(page_name, "Bundestag", negate =T))
 
 # saveRDS(election_dat30, "../data/election_dat30.rds")
 # saveRDS(election_dat7, "../data/election_dat7.rds")
@@ -118,6 +120,11 @@ if(the_currency == "EUR"){
 }
 
 
+
+# election_dat30 %>% 
+#   filter(type == "detailed") %>% 
+#   filter(value == "Data migration")
+#   count(type)
 ```
 
 This section shows spending per *targeting criteria* used by political parties to reach citizens in the run-up to the `r sets$election_title` for the latest available data. It only includes targeting on Meta platforms (Facebook and Instagram), which offers the most detailed targeting options to political advertisers.
